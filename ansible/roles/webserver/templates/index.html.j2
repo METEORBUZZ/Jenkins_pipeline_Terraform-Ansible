@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ app_name }} | Terraform + Ansible CI/CD</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --secondary: #8b5cf6;
+      --accent: #10b981;
+      --bg: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: radial-gradient(circle at 15% 15%, #1e1b4b 0%, #0f172a 50%, #020617 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 2.5rem 1.25rem;
+    }
+
+    .container {
+      max-width: 1040px;
+      width: 100%;
+    }
+
+    /* Header & Hero */
+    .hero {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+      padding: 0.4rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.025em;
+      margin-bottom: 1.25rem;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.2); }
+    }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #ffffff 30%, #93c5fd 70%, #c4b5fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.75rem;
+    }
+
+    .subtitle {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      max-width: 650px;
+      margin: 0 auto;
+    }
+
+    /* Stack Badges */
+    .stack-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 1.5rem 0 2rem;
+    }
+
+    .stack-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      padding: 0.45rem 1rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      backdrop-filter: blur(8px);
+    }
+
+    .stack-pill span.icon {
+      font-size: 1rem;
+    }
+
+    /* Pipeline Flow Cards */
+    .pipeline-section {
+      margin-bottom: 2.5rem;
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .flow-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .flow-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1.25rem;
+      backdrop-filter: blur(12px);
+      position: relative;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .flow-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(96, 165, 250, 0.35);
+    }
+
+    .flow-step-num {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #60a5fa;
+      background: rgba(37, 99, 235, 0.15);
+      border-radius: 6px;
+      padding: 0.2rem 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .flow-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 0.35rem;
+    }
+
+    .flow-card p {
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Server Telemetry Grid */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      backdrop-filter: blur(12px);
+    }
+
+    .card h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.65rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.875rem;
+    }
+
+    .metric-row:last-child {
+      border-bottom: none;
+    }
+
+    .metric-label {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .metric-value {
+      color: #f1f5f9;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.825rem;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      word-break: break-all;
+    }
+
+    /* Verification Box */
+    .verify-box {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+      border: 1px solid rgba(147, 197, 253, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .verify-box h3 {
+      font-size: 1.1rem;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+    }
+
+    .verify-box p {
+      font-size: 0.875rem;
+      color: #94a3b8;
+      margin-bottom: 1rem;
+    }
+
+    .endpoint-code {
+      display: inline-block;
+      background: #090d16;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: #38bdf8;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 2.5rem;
+      text-align: center;
+      font-size: 0.825rem;
+      color: #64748b;
+    }
+
+    footer a {
+      color: #94a3b8;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Hero Header -->
+    <header class="hero">
+      <div class="status-badge">
+        <span class="pulse-dot"></span>
+        <span>Infrastructure Active & Configured</span>
+      </div>
+      <h1>{{ app_name }}</h1>
+      <p class="subtitle">Fully automated Infrastructure as Code (Terraform) and Configuration Management (Ansible) managed via Jenkins CI/CD.</p>
+
+      <div class="stack-row">
+        <div class="stack-pill"><span class="icon">👨‍✈️</span> Jenkins Controller</div>
+        <div class="stack-pill"><span class="icon">🏗️</span> Terraform AWS</div>
+        <div class="stack-pill"><span class="icon">📜</span> Ansible Automation</div>
+        <div class="stack-pill"><span class="icon">🌐</span> Nginx Web Server</div>
+        <div class="stack-pill"><span class="icon">🐧</span> Ubuntu 22.04 LTS</div>
+      </div>
+    </header>
+
+    <!-- Pipeline Flow Overview -->
+    <section class="pipeline-section">
+      <div class="section-title">
+        <span>⚡</span> Automated Execution Lifecycle
+      </div>
+      <div class="flow-grid">
+        <div class="flow-card">
+          <span class="flow-step-num">STAGE 01</span>
+          <h3>Git Webhook</h3>
+          <p>Code pushed to repository triggers Jenkins Pipeline job automatically.</p>
+        </div>
+        <div class="flow-card">
+          <span class="flow-step-num">STAGE 02</span>
+          <h3>Terraform Plan</h3>
+          <p>Generates deterministic execution plan for VPC, Security Groups, and EC2.</p>
+        </div>
+        <div class="flow-card">
+          <span class="flow-step-num">STAGE 03</span>
+          <h3>Terraform Apply</h3>
+          <p>Provisions AWS infrastructure & emits dynamic inventory file for Ansible.</p>
+        </div>
+        <div class="flow-card">
+          <span class="flow-step-num">STAGE 04</span>
+          <h3>Ansible Configure</h3>
+          <p>Executes playbook over SSH to install Nginx, firewall rules, and assets.</p>
+        </div>
+        <div class="flow-card">
+          <span class="flow-step-num">STAGE 05</span>
+          <h3>Health Verification</h3>
+          <p>Automated curl smoke test confirms HTTP 200 response from webserver.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Telemetry Cards -->
+    <div class="telemetry-grid">
+      <!-- Node Information -->
+      <div class="card">
+        <h2><span>🖥️</span> Node Metadata</h2>
+        <div class="metric-row">
+          <span class="metric-label">Hostname</span>
+          <span class="metric-value">{{ ansible_hostname | default(inventory_hostname) }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Operating System</span>
+          <span class="metric-value">{{ ansible_distribution | default('Linux') }} {{ ansible_distribution_version | default('') }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Architecture</span>
+          <span class="metric-value">{{ ansible_architecture | default('x86_64') }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Kernel Version</span>
+          <span class="metric-value">{{ ansible_kernel | default('Linux') }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Web Service</span>
+          <span class="metric-value">{{ (nginx_service_name | default('nginx')) | upper }} / Port {{ nginx_port | default(80) }}</span>
+        </div>
+      </div>
+
+      <!-- Network & Deployment -->
+      <div class="card">
+        <h2><span>🌐</span> Network & Pipeline</h2>
+        <div class="metric-row">
+          <span class="metric-label">Public IP</span>
+          <span class="metric-value">{{ ansible_host | default(inventory_hostname) }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Private IP</span>
+          <span class="metric-value">{{ (ansible_default_ipv4 | default({})).address | default('N/A') }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Ansible Remote User</span>
+          <span class="metric-value">{{ ansible_user_id | default('ubuntu') }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Application Version</span>
+          <span class="metric-value">{{ app_version | default('1.0.0') }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Managed By</span>
+          <span class="metric-value">{{ maintainer | default('DevOps Infrastructure Team') }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verification Section -->
+    <div class="verify-box">
+      <h3>🚀 End-to-End Pipeline Verification Successful</h3>
+      <p>This web service was provisioned by Terraform and configured by Ansible via the automated Jenkins CI/CD pipeline.</p>
+      <div class="endpoint-code">http://{{ ansible_host | default(inventory_hostname) }} (HTTP 200 OK)</div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>Project: <strong>Jenkins Pipeline: Terraform + Ansible</strong> &bull; CI/CD applied to infrastructure lifecycle.</p>
+    </footer>
+  </div>
+</body>
+</html>
+

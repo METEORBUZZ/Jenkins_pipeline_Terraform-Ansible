@@ -1,0 +1,33 @@
+---
+- name: Configure Real-Time Node.js WebSocket Chat Infrastructure
+  hosts: webservers
+  gather_facts: no
+  become: yes
+
+  pre_tasks:
+    - name: Wait up to 120 seconds for target machine to become reachable over SSH
+      ansible.builtin.wait_for_connection:
+        delay: 5
+        timeout: 120
+
+    - name: Gather system facts once SSH connectivity is verified
+      ansible.builtin.setup:
+
+    - name: Announce configuration execution
+      ansible.builtin.debug:
+        msg: "SSH connected to {{ inventory_hostname }} ({{ ansible_host | default(inventory_hostname) }}). Running on {{ ansible_distribution | default('Linux') }} {{ ansible_distribution_version | default('') }}."
+
+  roles:
+    - role: webserver
+
+  post_tasks:
+    - name: Display deployment success banner
+      ansible.builtin.debug:
+        msg:
+          - "=========================================================="
+          - " 🚀 DevChat Real-time WebSocket App Deployment Complete!  "
+          - " Public IP       : {{ ansible_host | default(inventory_hostname) }} "
+          - " Live Web App    : http://{{ ansible_host | default(inventory_hostname) }} "
+          - " Direct Port 3000: http://{{ ansible_host | default(inventory_hostname) }}:3000 "
+          - " Health Endpoint : http://{{ ansible_host | default(inventory_hostname) }}/health "
+          - "=========================================================="

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevChat | Real-time Node.js & WebSocket Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Join Overlay Modal -->
+  <div id="join-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-icon">💬</div>
+      <h2>Join DevChat Live</h2>
+      <p class="modal-desc">Real-time WebSocket chat powered by Node.js & Nginx CI/CD</p>
+      
+      <form id="join-form">
+        <label for="username-input">Choose your username</label>
+        <div class="input-row">
+          <input 
+            type="text" 
+            id="username-input" 
+            placeholder="e.g. CloudArchitect" 
+            maxlength="25" 
+            autocomplete="off" 
+            required 
+            autofocus
+          />
+          <button type="button" id="random-name-btn" title="Generate random handle">🎲</button>
+        </div>
+        <button type="submit" class="btn-primary">Enter Chat Room</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Chat Application Container -->
+  <div class="app-container">
+    <!-- Header Bar -->
+    <header class="app-header">
+      <div class="header-left">
+        <button id="toggle-sidebar-btn" class="icon-btn mobile-only" aria-label="Toggle users list">👥</button>
+        <div class="logo">
+          <span class="logo-icon">⚡</span>
+          <span class="logo-text">DevChat</span>
+          <span class="logo-badge">WebSocket</span>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <div id="connection-status" class="status-indicator connecting">
+          <span class="status-dot"></span>
+          <span class="status-text">Connecting...</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="user-chip" id="current-user-chip">
+          <span class="avatar-dot" id="my-avatar-dot"></span>
+          <span class="user-name" id="my-username">Guest</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- App Body: Sidebar + Chat Messages -->
+    <main class="app-body">
+      <!-- Users Sidebar -->
+      <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+          <h3>Online Users (<span id="user-count">0</span>)</h3>
+        </div>
+        <ul id="user-list" class="user-list">
+          <!-- Dynamically populated -->
+        </ul>
+        <div class="sidebar-footer">
+          <div class="meta-item">
+            <span class="meta-label">Protocol:</span>
+            <span class="meta-value">RFC 6455 (WSS/WS)</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Backend:</span>
+            <span class="meta-value">Node.js + Express</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Chat Area -->
+      <section class="chat-section">
+        <!-- Message Stream -->
+        <div id="messages-container" class="messages-container">
+          <div class="welcome-banner">
+            <div class="welcome-icon">🚀</div>
+            <h3>Welcome to DevChat Live!</h3>
+            <p>Messages are broadcast via persistent duplex WebSockets.</p>
+          </div>
+        </div>
+
+        <!-- Typing Indicator -->
+        <div id="typing-indicator" class="typing-indicator"></div>
+
+        <!-- Emoji Quick Bar -->
+        <div class="quick-emojis">
+          <button type="button" class="emoji-btn" data-emoji="👍">👍</button>
+          <button type="button" class="emoji-btn" data-emoji="🔥">🔥</button>
+          <button type="button" class="emoji-btn" data-emoji="🚀">🚀</button>
+          <button type="button" class="emoji-btn" data-emoji="❤️">❤️</button>
+          <button type="button" class="emoji-btn" data-emoji="🎉">🎉</button>
+          <button type="button" class="emoji-btn" data-emoji="💻">💻</button>
+        </div>
+
+        <!-- Message Input Form -->
+        <form id="chat-form" class="chat-input-bar">
+          <input 
+            type="text" 
+            id="message-input" 
+            placeholder="Type your message..." 
+            autocomplete="off" 
+            maxlength="1000"
+            disabled
+          />
+          <button type="submit" id="send-btn" class="send-btn" disabled aria-label="Send message">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+            </svg>
+          </button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+

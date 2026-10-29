@@ -1,0 +1,10 @@
+# Example inventory file format
+# Generated automatically by Terraform in production pipeline runs
+
+[webservers]
+web_node_01 ansible_host=54.210.12.34 ansible_user=ubuntu
+
+[webservers:vars]
+ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+public_dns="ec2-54-210-12-34.compute-1.amazonaws.com"
+

@@ -1,0 +1,24 @@
+
+
+# Ansible
+*.retry
+*.log
+
+# SSH Keys and Credentials
+*.pem
+*.key
+id_rsa
+id_rsa.pub
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+

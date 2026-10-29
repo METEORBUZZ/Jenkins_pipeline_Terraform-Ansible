@@ -1,0 +1,22 @@
+[Unit]
+Description=Node.js WebSocket Chat Application
+Documentation=https://github.com/
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory={{ app_deploy_dir | default('/opt/chat-app') }}
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=5
+Environment=PORT={{ app_port | default(3000) }}
+Environment=NODE_ENV=production
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=chat-app
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,9 @@
+---
+app_name: "DevChat Live"
+app_version: "1.0.0"
+maintainer: "DevOps Infrastructure Team"
+app_deploy_dir: "/opt/chat-app"
+app_port: 3000
+nginx_service_name: "nginx"
+nginx_port: 80
+nodejs_major_version: "20"

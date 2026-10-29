@@ -1,0 +1,11 @@
+aws_region          = "us-east-1"
+project_name        = "jenkins-tf-ansible"
+environment         = "dev"
+instance_type       = "t2.micro"
+ssh_user            = "ubuntu"
+public_key_path     = "~/.ssh/id_rsa.pub"
+# Or provide the key string directly (recommended for CI/CD environment variables):
+# ssh_public_key    = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB..."
+allowed_ssh_cidrs   = ["0.0.0.0/0"]
+allowed_http_cidrs  = ["0.0.0.0/0"]
+

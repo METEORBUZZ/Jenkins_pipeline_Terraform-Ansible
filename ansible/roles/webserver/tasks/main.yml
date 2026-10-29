@@ -1,0 +1,131 @@
+---
+- name: Wait for cloud-init to finish (prevents apt/dpkg lock contention on AWS EC2)
+  ansible.builtin.command: cloud-init status --wait
+  changed_when: false
+  failed_when: false
+
+- name: Update apt repository cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  when: ansible_os_family == "Debian"
+
+- name: Install prerequisite packages
+  ansible.builtin.apt:
+    name:
+      - curl
+      - ca-certificates
+      - gnupg
+      - git
+      - nginx
+    state: present
+    update_cache: true
+
+# Install Node.js LTS via official NodeSource repository
+- name: Download NodeSource repository setup script
+  ansible.builtin.get_url:
+    url: "https://deb.nodesource.com/setup_{{ nodejs_major_version | default('20') }}.x"
+    dest: /tmp/nodesource_setup.sh
+    mode: '0755'
+
+- name: Execute NodeSource repository setup script
+  ansible.builtin.command: /tmp/nodesource_setup.sh
+  args:
+    creates: /etc/apt/sources.list.d/nodesource.list
+
+- name: Install Node.js and npm
+  ansible.builtin.apt:
+    name: nodejs
+    state: present
+    update_cache: true
+
+- name: Ensure chat app deployment directory exists
+  ansible.builtin.file:
+    path: "{{ app_deploy_dir | default('/opt/chat-app') }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: Deploy Chat Application codebase to target server
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../chat-app/"
+    dest: "{{ app_deploy_dir | default('/opt/chat-app') }}/"
+    owner: www-data
+    group: www-data
+    mode: '0755'
+  notify: restart chat-app
+
+- name: Install Node.js production dependencies via npm
+  ansible.builtin.command:
+    cmd: npm install --omit=dev
+    chdir: "{{ app_deploy_dir | default('/opt/chat-app') }}"
+  become_user: www-data
+  environment:
+    NODE_ENV: production
+  register: npm_install_result
+  changed_when: "'added' in npm_install_result.stdout or 'audited' in npm_install_result.stdout"
+
+- name: Configure systemd service for Node.js WebSocket chat app
+  ansible.builtin.template:
+    src: chat-app.service.j2
+    dest: /etc/systemd/system/chat-app.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart chat-app
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Ensure chat-app systemd daemon is started and enabled on boot
+  ansible.builtin.service:
+    name: chat-app
+    state: started
+    enabled: true
+
+- name: Configure Nginx as reverse proxy with WebSocket upgrade support
+  ansible.builtin.template:
+    src: nginx-chat.conf.j2
+    dest: /etc/nginx/sites-available/default
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload nginx
+
+- name: Remove default Ubuntu welcome page if present
+  ansible.builtin.file:
+    path: /var/www/html/index.nginx-debian.html
+    state: absent
+
+- name: Ensure Nginx service is started and enabled on boot
+  ansible.builtin.service:
+    name: "{{ nginx_service_name | default('nginx') }}"
+    state: started
+    enabled: true
+
+- name: Flush handlers to ensure services are fully restarted with latest configs
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify Node.js backend health endpoint (Port 3000)
+  ansible.builtin.command: "curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:{{ app_port | default(3000) }}/health"
+  register: nodejs_health_check
+  until: nodejs_health_check.stdout == "200"
+  retries: 8
+  delay: 3
+  changed_when: false
+
+- name: Verify Nginx WebSocket reverse proxy endpoint (Port 80)
+  ansible.builtin.command: "curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:{{ nginx_port | default(80) }}/health"
+  register: nginx_health_check
+  until: nginx_health_check.stdout == "200"
+  retries: 8
+  delay: 3
+  changed_when: false
+
+- name: Display deployment verification summary
+  ansible.builtin.debug:
+    msg:
+      - " Node.js WebSocket service verified active on port {{ app_port | default(3000) }} (HTTP {{ nodejs_health_check.stdout }} OK)."
+      - " Nginx reverse proxy verified routing traffic on port {{ nginx_port | default(80) }} (HTTP {{ nginx_health_check.stdout }} OK)."
